@@ -12,3 +12,4 @@ data/processed/
 # Dahili hazırlık belgeleri
 docs/proje_durumu.md
 docs/PINN-BAP-sunum.pdf
+.DS_Store
