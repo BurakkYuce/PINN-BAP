@@ -1,0 +1,66 @@
+# =====================================================================
+# Parametrik PINN — parametre uzayı ve fizik ayarları
+# Model:  h, u = f(x, t, B, t_f, h0, n)
+# =====================================================================
+
+# Fizik sabitleri (tüm fazlarda ortak)
+physics:
+  g: 9.81        # yerçekimi ivmesi (m/s^2)
+  S0: 0.0        # taban eğimi (düz yatak)
+  nu: 0.0        # artificial viscosity (şok regularizasyonu; 0 = kapalı)
+
+# ---------------------------------------------------------------------
+# FAZ 3 — parametre aralıkları (Latin Hypercube örnekleme için)
+# Ağ bu aralıklar içindeki HER (B, t_f, h0, n) kombinasyonunu öğrenir.
+# ---------------------------------------------------------------------
+param_ranges:
+  B:    { min: 20.0,  max: 120.0 }   # kırılma genişliği (m)
+  t_f:  { min: 0.1,   max: 2.0   }   # kırılma oluşum süresi (saat)
+  h0:   { min: 5.0,   max: 45.0  }   # rezervuar başlangıç su seviyesi (m)
+  n:    { min: 0.02,  max: 0.06  }   # Manning pürüzlülük katsayısı
+
+# ---------------------------------------------------------------------
+# FAZ 1 — tek senaryo (Stoker ıslak-yatak dam-break doğrulaması)
+# Sürtünmesiz, düz yatak: saf Stoker analitik çözümüyle karşılaştırma.
+# ---------------------------------------------------------------------
+baseline:
+  domain:
+    x_min: -10.0     # alan sol sınırı (m)
+    x_max:  10.0     # alan sağ sınırı (m)
+    x0:      0.0     # baraj/membran konumu (m)
+    T:       1.0     # simülasyon süresi (s)
+  initial:
+    hl:  1.0         # sol (rezervuar) su derinliği (m)
+    hr:  0.5         # sağ (mansap) su derinliği (m) — ıslak yatak: hr > 0
+    eps: 0.1         # tanh yumuşatma genişliği (m); keskin basamak PINN'i bozar
+  manning_n: 0.0     # Faz 1 sürtünmesiz (n=0) — saf Stoker karşılaştırması
+
+# ---------------------------------------------------------------------
+# DENEYSEL senaryo — Vosoughi vd. (2021) laboratuvar dam-break
+# Rezervuar H=30 cm, ıslak mansap 2 cm, flume; gerçek ölçümle karşılaştırma.
+# Alan/zaman penceresi dalga sınıra ulaşmadan seçildi (far-field BC geçerli).
+# ---------------------------------------------------------------------
+experimental:
+  domain:
+    x_min: 0.0       # flume başı (m)
+    x_max: 5.52      # son ölçüm konumu L=552 cm (m)
+    x0:    1.57      # kapı konumu (analitik oturtmadan ~157 cm)
+    T:     0.8       # s (dalga bu sürede sınırlara ulaşmaz)
+  initial:
+    hl:  0.30        # rezervuar derinliği (m) = 30 cm
+    hr:  0.02        # ıslak mansap (m) = 2 cm
+    eps: 0.05        # tanh yumuşatma (m)
+  manning_n: 0.012   # pürüzsüz flume (cam/akrilik) ~ 0.01-0.012
+  nu: 0.0005         # küçük artificial viscosity (güçlü şok regularizasyonu)
+  predict_times: [0.04, 0.08, 0.12, 0.20, 0.30, 0.40, 0.60, 0.80]
+
+# Eğitim ayarları — senaryo bazlı
+training:
+  layers: [64, 64, 64, 64]   # gizli katmanlar
+  activation: "tanh"
+  baseline:
+    full:  { adam_iters: 15000, lbfgs: true,  num_domain: 3000, num_boundary: 300, num_initial: 600 }
+    smoke: { adam_iters: 1500,  lbfgs: false, num_domain: 1200, num_boundary: 150, num_initial: 300 }
+  experimental:              # daha zor (güçlü şok + sürtünme) -> daha çok iterasyon
+    full:  { adam_iters: 12000, lbfgs: true,  num_domain: 4000, num_boundary: 400, num_initial: 800 }
+    smoke: { adam_iters: 2000,  lbfgs: false, num_domain: 1500, num_boundary: 200, num_initial: 400 }

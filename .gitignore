@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Eğitim çıktıları (büyük; kod ile yeniden üretilir)
+results/
+data/raw/
+data/processed/
+*.zip
+
+# Dahili hazırlık belgeleri
+docs/proje_durumu.md
+docs/PINN-BAP-sunum.pdf

@@ -1,0 +1,128 @@
+# =====================================================================
+# 2D Parametrik PINN — alan, radyal IC ve fizik ayarları
+# Model (Faz 2A): h, u, v = f(x, y, t)
+# Model (Faz 2C): h, u, v = f(x, y, t, B, t_f, h0, n)
+# =====================================================================
+
+physics:
+  g: 9.81
+  S0x: 0.0       # x-yönü taban eğimi
+  S0y: 0.0       # y-yönü taban eğimi
+  n: 0.0         # Faz 2A tek senaryo sürtünmesiz (radyal sanity check)
+  nu: 0.001      # 2D artificial viscosity (şok regularizasyonu; 2D'de kritik)
+
+# ---------------------------------------------------------------------
+# FAZ 2A — radyal (silindirik) dam-break tek senaryo
+# Merkezde R0 yarıçaplı hl derinliğinde su sütunu; dışarıda hr. Dışa yayılır.
+# Alan, dalga kenarlara T süresince ulaşmayacak şekilde seçildi (far-field BC).
+# ---------------------------------------------------------------------
+baseline_2d:
+  domain:
+    x_min: 0.0
+    x_max: 10.0
+    y_min: 0.0
+    y_max: 10.0
+    T:     0.6      # s
+  radial_ic:
+    x_c: 5.0        # merkez x
+    y_c: 5.0        # merkez y
+    R0:  1.5        # başlangıç su sütunu yarıçapı (m)
+    hl:  1.0        # iç derinlik (m)
+    hr:  0.5        # dış derinlik (m) — ıslak (hr>0)
+    eps: 0.15       # radyal tanh yumuşatma genişliği (m)
+
+# Eğitim ayarları
+training:
+  layers: [64, 64, 64, 64, 64]   # 2D daha derin/geniş
+  activation: "tanh"
+  predict_times: [0.2, 0.4, 0.6]
+  full:
+    adam_iters: 30000
+    lbfgs: true
+    num_domain: 8000
+    num_boundary: 800
+    num_initial: 1600
+  smoke:                          # hızlı uçtan uca test (convergence beklenmez)
+    adam_iters: 2500
+    lbfgs: false
+    num_domain: 2000
+    num_boundary: 300
+    num_initial: 600
+
+# ---------------------------------------------------------------------
+# FAZ 2C — parametrik 2D uzay (referans/gerçek baraj aralıkları)
+# NOT: t_f burada SAAT cinsindedir. Bu aralıklar gerçek baraj ölçeğini temsil
+# eder; doğrudan 2D eğitimde kullanılırsa T >= 7200 s ve ~40 km alan gerekir
+# (dalga ~5 m/s ile 2 saatte 36 km yol alır). Eğitilebilir demonstratör için
+# aşağıdaki `parametric_2d.param_ranges` (saniye cinsinden, küçültülmüş) kullanılır.
+# ---------------------------------------------------------------------
+param_ranges:
+  B:    { min: 20.0,  max: 120.0 }
+  t_f:  { min: 0.1,   max: 2.0   }   # saat
+  h0:   { min: 5.0,   max: 45.0  }
+  n:    { min: 0.02,  max: 0.06  }
+
+# ---------------------------------------------------------------------
+# FAZ 2B — Ürkmez vakası (2D, gerçek baraj senaryosu)
+# Mansap taşkın ovası; breach x=0 kenarından hidrografla beslenir.
+# Taban DÜZ kabul edilir — gerçek DEM/topografya eklenmeli (bkz. cases/urkmez.json).
+# ---------------------------------------------------------------------
+urkmez_2d:
+  domain:
+    x_min: 0.0
+    x_max: 4000.0
+    y_min: 0.0
+    y_max: 3000.0
+    T:     900.0      # s — eğitilebilirlik için kısaltıldı (vaka dosyasında 3600 s)
+  bed:
+    S0x: 0.005        # mansap yönünde taban eğimi (yer tutucu — DEM'den gelmeli)
+    S0y: 0.0
+  breach:
+    y_c:   1500.0     # breach merkezi (m)
+    B:     63.7       # Froehlich ortalama kırılma genişliği (m)
+    t_f:   2052.0     # kırılma oluşum süresi (s) = 0.57 saat
+    Q_peak: 6417.0    # pik debi (m^3/s) — Haltas vd. 2016
+    recession_factor: 3.0   # resesyon süresi = recession_factor * t_f
+  h_min: 0.05         # ıslak-yatak tabanı (m); kuru yatak h^(4/3) sürtünmesini patlatır
+  manning_n: 0.04
+  nu: 0.05            # büyük ölçekte şok regularizasyonu (m^2/s)
+  training:
+    layers: [96, 96, 96, 96, 96]
+    activation: "tanh"
+    predict_times: [150.0, 450.0, 900.0]
+    full:  { adam_iters: 30000, lbfgs: true,  num_domain: 12000, num_boundary: 3000, num_initial: 2000 }
+    smoke: { adam_iters: 2000,  lbfgs: false, num_domain: 3000,  num_boundary: 1200, num_initial: 600  }
+
+# ---------------------------------------------------------------------
+# FAZ 2C — parametrik 2D demonstratör (EĞİTİLEBİLİR rejim)
+# Rezervuar ALAN İÇİNDEDİR: x < x_dam bölgesi h0 derinliğinde su tutar.
+# Baraj gövdesi x = x_dam çizgisinde; ortasında zamanla büyüyen B(t) açıklığı:
+#     B(t) = B * min(t / t_f, 1)
+# Böylece breach hidrografı DIŞARIDAN verilmez — akış fizikten kendiliğinden doğar.
+# ---------------------------------------------------------------------
+parametric_2d:
+  domain:
+    x_min: 0.0
+    x_max: 3000.0
+    y_min: 0.0
+    y_max: 1200.0
+    T:     150.0      # s — dalga (sqrt(g*h0_max)~15.7 m/s) alan dışına çıkmaz
+  dam:
+    x_dam: 500.0      # baraj gövdesi çizgisi (m) — gerisi rezervuar
+    y_c:   600.0      # breach merkezi (m)
+    eps_x: 30.0       # başlangıç koşulu yumuşatma genişliği (m)
+    w_wall: 40.0      # gövdenin sayısal kalınlığı (Gauss yarı-genişliği, m)
+    s_open: 20.0      # açıklık kenarı yumuşatma ölçeği (m)
+  h_min: 0.05         # mansap ıslak-yatak tabanı (m)
+  nu: 0.05            # artificial viscosity (m^2/s)
+  # Demonstratör aralıkları — saniye cinsinden t_f, alan/süreyle uyumlu.
+  param_ranges:
+    B:    { min: 50.0,  max: 300.0 }   # kırılma genişliği (m)
+    t_f:  { min: 20.0,  max: 120.0 }   # kırılma oluşum süresi (s)
+    h0:   { min: 5.0,   max: 25.0  }   # rezervuar derinliği (m)
+    n:    { min: 0.02,  max: 0.06  }   # Manning
+  training:
+    layers: [128, 128, 128, 128, 128]
+    activation: "tanh"
+    full:  { adam_iters: 40000, lbfgs: true,  num_domain: 20000, num_boundary: 8000, num_initial: 4000 }
+    smoke: { adam_iters: 2000,  lbfgs: false, num_domain: 4000,  num_boundary: 2000, num_initial: 1000 }

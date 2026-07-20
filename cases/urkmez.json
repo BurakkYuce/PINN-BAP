@@ -1,0 +1,29 @@
+{
+  "name": "Ürkmez Barajı",
+  "country": "Türkiye",
+  "reference": "Haltas, Tayfur & Elci (2016) — FLO-2D benchmark, ~%14 derinlik hatası",
+  "dam_type": "earth-fill",
+  "dam_type_tr": "toprak dolgu",
+  "failure_mechanism": "gradual breach (overtopping)",
+  "breach_model": "Froehlich-2008",
+  "in_scope": true,
+  "failure_mode": "overtopping",
+  "reservoir_volume_m3": 7.6e6,
+  "crest_elevation_m": 45.88,
+  "final_bed_elevation_m": 17.0,
+  "breach_height_m": 26.9,
+  "breach_width_avg_m": 63.7,
+  "breach_formation_time_hr": 0.57,
+  "peak_discharge_m3s": 6417,
+  "manning_n": 0.04,
+  "overtopping": true,
+  "domain_2d": {
+    "comment": "2D PINN alanı için yer-tutucu sınırlayıcı kutu (bbox). Gerçek değerler DEM/topografyadan veya FLO-2D alanından alınmalı.",
+    "x_min_m": 0.0,
+    "x_max_m": 4000.0,
+    "y_min_m": 0.0,
+    "y_max_m": 3000.0,
+    "T_s": 3600.0
+  },
+  "notes": "Parametre uzayında BİR nokta. Genel parametrik model bu değerlerle test edilir; model Ürkmez'e özel değildir. domain_2d yer-tutucudur; FLO-2D/DEM alanıyla güncellenmeli."
+}

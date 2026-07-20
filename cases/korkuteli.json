@@ -1,0 +1,24 @@
+{
+  "name": "Korkuteli Barajı",
+  "country": "Türkiye",
+  "location": "Antalya / Korkuteli, Korkuteli Çayı",
+  "dam_type": "earth-fill",
+  "dam_type_tr": "toprak gövde dolgu",
+  "failure_mechanism": "gradual breach (overtopping/piping)",
+  "breach_model": "Froehlich-2008",
+  "in_scope": true,
+  "reference": "Vikipedi / DSİ — gövde dolgu, 70 m, göl 47.5 hm³ (1968-1976)",
+  "crest_height_m": 70.0,
+  "body_volume_m3": 2.02e6,
+  "reservoir_volume_m3": 47.5e6,
+  "purpose": "sulama, taşkın kontrolü, içme suyu",
+  "manning_n": 0.04,
+  "overtopping": true,
+  "froehlich_estimate": {
+    "comment": "hb ≈ gövde yüksekliği (70 m) VARSAYIMIYLA hesaplandı; gerçek kırılma yüksekliği DSİ/etüt verisi gerektirir.",
+    "assumed_breach_height_m": 70.0,
+    "breach_width_avg_m": 119.0,
+    "breach_formation_time_hr": 0.55
+  },
+  "notes": "İkinci toprak-dolgu test vakası (Ürkmez ile aynı rejim). Froehlich + parametrik PINN doğrudan uygulanır. Kırılma yüksekliği/genişliği gerçek değerlerle güncellenmeli."
+}

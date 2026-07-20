@@ -1,0 +1,16 @@
+{
+  "name": "Oymapınar Barajı",
+  "country": "Türkiye",
+  "location": "Antalya / Manavgat Çayı",
+  "dam_type": "concrete-arch",
+  "dam_type_tr": "beton çift-kavisli kemer",
+  "failure_mechanism": "sudden / structural-foundation (instantaneous)",
+  "breach_model": "instantaneous dam-break (t_f ≈ 0)",
+  "in_scope": false,
+  "reference": "Vikipedi — beton çift-kavisli kemer, 185 m (1977-1984)",
+  "crest_height_m": 185.0,
+  "body_volume_m3": 575000,
+  "purpose": "enerji (540 MW)",
+  "notes": "BETON KEMER baraj — kademeli kırılma YOKTUR. Froehlich UYGULANMAZ. Hidrolik olarak ani (instantaneous) dam-break gibi ele alınır (Ritter/Stoker, t_f→0); yıkılma tetiği geoteknik/yapısaldır ve bu hidrolik PINN'in kapsamı dışındadır. Bkz. docs/baraj_tipleri.md. Parametrik (B,t_f) modeline DAHİL EDİLMEZ.",
+  "warning": "Bu vakayı parametrik embankment modeliyle aynı kefeye koyma — yıkılma mekanizması farklı."
+}

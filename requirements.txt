@@ -1,0 +1,10 @@
+# Parametrik PINN — Baraj Yıkılma Projesi bağımlılıkları
+# Not: DeepXDE PyTorch backend ile kullanılır -> DDE_BACKEND=pytorch
+# torch/numpy/scipy/matplotlib genelde önceden kurulu olur; numpy<2 uyumluluk içindir.
+
+deepxde>=1.15
+torch>=2.0
+numpy<2
+scipy>=1.10
+matplotlib>=3.5
+pyyaml>=6.0
