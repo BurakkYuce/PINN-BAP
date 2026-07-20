@@ -46,6 +46,10 @@ import deepxde as dde  # noqa: E402
 import torch  # noqa: E402
 import yaml  # noqa: E402
 
+# GPU'da ufak kazanç: sabit girdi boyutunda en hızlı cuDNN çekirdeğini seç.
+if torch.cuda.is_available():
+    torch.backends.cudnn.benchmark = True
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 from physics.saint_venant_2d import make_pde_2d  # noqa: E402
@@ -226,7 +230,8 @@ def train(smoke: bool = False) -> None:
     losshistory, _ = model.train(iterations=train_cfg["adam_iters"], display_every=500)
 
     if train_cfg["lbfgs"]:
-        print("[pinn_urkmez_2d] L-BFGS ince ayar...")
+        print("[pinn_urkmez_2d] L-BFGS ince ayar (maxiter=3000)...")
+        dde.optimizers.set_LBFGS_options(maxiter=3000)  # varsayılan 15000 çok uzun
         model.compile("L-BFGS")
         losshistory, _ = model.train()
 

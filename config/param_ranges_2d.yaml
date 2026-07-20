@@ -90,7 +90,8 @@ urkmez_2d:
     layers: [96, 96, 96, 96, 96]
     activation: "tanh"
     predict_times: [150.0, 450.0, 900.0]
-    full:  { adam_iters: 30000, lbfgs: true,  num_domain: 12000, num_boundary: 3000, num_initial: 2000 }
+    # "full" = sunumluk hızlı tam eğitim (~15-20 dk T4). Yayın için: adam_iters 30000.
+    full:  { adam_iters: 10000, lbfgs: true,  num_domain: 12000, num_boundary: 3000, num_initial: 2000 }
     smoke: { adam_iters: 2000,  lbfgs: false, num_domain: 3000,  num_boundary: 1200, num_initial: 600  }
 
 # ---------------------------------------------------------------------
@@ -124,5 +125,6 @@ parametric_2d:
   training:
     layers: [128, 128, 128, 128, 128]
     activation: "tanh"
-    full:  { adam_iters: 40000, lbfgs: true,  num_domain: 20000, num_boundary: 8000, num_initial: 4000 }
+    # "full" = sunumluk hızlı tam eğitim (~25-35 dk T4). Yayın için: adam_iters 40000.
+    full:  { adam_iters: 12000, lbfgs: true,  num_domain: 20000, num_boundary: 8000, num_initial: 4000 }
     smoke: { adam_iters: 2000,  lbfgs: false, num_domain: 4000,  num_boundary: 2000, num_initial: 1000 }
